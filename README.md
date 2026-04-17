@@ -96,6 +96,11 @@ python -m src.test \
   --checkpoint ./outputs/train_YYYYMMDD_HHMMSS/checkpoints/best_model.npz
 ```
 
+## Submission Links
+
+- Public GitHub Repo: https://github.com/zj-yao/EuroSAT
+- Model weights: https://drive.google.com/drive/folders/19-EYj3Hr5w9Q4OCMcJ3-HDq9GykV07_2?usp=sharing
+
 ## Generated Artifacts
 
 Each training run creates:
@@ -117,4 +122,3 @@ Each test run creates:
 - No auto-diff framework is used.
 - Checkpoints store model weights, normalization stats, class names, and the exact train/val/test splits so testing reproduces the same partition.
 - For quick smoke tests, all scripts accept `--max_train_samples`, `--max_val_samples`, and `--max_test_samples`.
-

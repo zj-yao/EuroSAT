@@ -9,6 +9,7 @@ outputs_validation/
 report/*.aux
 report/*.log
 report/*.out
+report/*.synctex.gz
 
 outputs/**
 !outputs/search_32_best/
