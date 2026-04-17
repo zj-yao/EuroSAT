@@ -1,0 +1,6 @@
+english hyphen.tex
+=usenglish
+=USenglish
+=american
+dumylang dumyhyph.tex
+nohyphenation zerohyph.tex
