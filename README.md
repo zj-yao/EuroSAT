@@ -1,6 +1,6 @@
 # EuroSAT MLP From Scratch
 
-This project implements a three-layer MLP classifier for EuroSAT RGB images using only `NumPy` for tensor math. Automatic differentiation, backpropagation, SGD, learning-rate decay, model selection, hyperparameter search, testing, weight visualization, and error analysis are implemented inside the repository.
+This project implements a three-layer MLP classifier for EuroSAT RGB images using only `NumPy` for tensor math. Automatic differentiation, backpropagation, SGD with momentum, learning-rate decay, model selection, hyperparameter search, data augmentation, testing, weight visualization, and error analysis are implemented inside the repository.
 
 ## Project Layout
 
@@ -46,20 +46,28 @@ EuroSAT_RGB/
 
 ## Train
 
-Default training keeps the original `64x64` images. If CPU training is too slow, pass `--image_size 32`.
+Recommended final training configuration:
 
 ```bash
 python -m src.train \
   --data_dir ./EuroSAT_RGB \
-  --epochs 30 \
+  --epochs 60 \
   --batch_size 128 \
-  --lr 0.01 \
-  --hidden_dims 128 64 \
+  --lr 0.005 \
+  --momentum 0.9 \
+  --weight_decay 1e-3 \
+  --step_size 10 \
+  --gamma 0.5 \
+  --hidden_dims 512 256 \
   --activation relu \
-  --weight_decay 1e-4
+  --image_size 48 \
+  --augment \
+  --min_crop_scale 0.85 \
+  --brightness_jitter 0.1 \
+  --run_name improved_aug48_momentum_v2_60ep
 ```
 
-Useful CPU-friendly variant:
+Baseline CPU-friendly variant:
 
 ```bash
 python -m src.train \
@@ -88,18 +96,26 @@ The search script samples from:
 
 By default it retrains the best configuration after search. Disable that with `--skip_retrain_best`.
 
+## Best Result
+
+- Best validation accuracy: `72.40%`
+- Test accuracy: `73.46%`
+- Test loss: `0.7372`
+- Final checkpoint (uploaded separately): `outputs/improved_aug48_momentum_v2_60ep/checkpoints/best_model.npz`
+
 ## Test
 
 ```bash
 python -m src.test \
   --data_dir ./EuroSAT_RGB \
-  --checkpoint ./outputs/train_YYYYMMDD_HHMMSS/checkpoints/best_model.npz
+  --checkpoint ./outputs/improved_aug48_momentum_v2_60ep/checkpoints/best_model.npz \
+  --run_name improved_aug48_momentum_v2_60ep_test
 ```
 
 ## Submission Links
 
 - Public GitHub Repo: https://github.com/zj-yao/EuroSAT
-- Model weights: https://drive.google.com/drive/folders/19-EYj3Hr5w9Q4OCMcJ3-HDq9GykV07_2?usp=sharing
+- Model weights: https://drive.google.com/file/d/12x7tM2sZAQbbmJRM7hQVw4cYtuewwr1B/view?usp=drive_link
 
 ## Generated Artifacts
 

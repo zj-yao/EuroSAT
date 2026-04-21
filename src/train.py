@@ -25,11 +25,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=0.01)
     parser.add_argument("--weight_decay", type=float, default=1e-4)
+    parser.add_argument("--momentum", type=float, default=0.0)
     parser.add_argument("--step_size", type=int, default=5)
     parser.add_argument("--gamma", type=float, default=0.5)
     parser.add_argument("--hidden_dims", type=int, nargs=2, default=[128, 64])
     parser.add_argument("--activation", type=str, default="relu", choices=["relu", "tanh", "sigmoid"])
     parser.add_argument("--image_size", type=int, default=64)
+    parser.add_argument("--augment", action="store_true")
+    parser.add_argument("--min_crop_scale", type=float, default=0.85)
+    parser.add_argument("--brightness_jitter", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--train_ratio", type=float, default=0.7)
     parser.add_argument("--val_ratio", type=float, default=0.15)
@@ -117,7 +121,12 @@ def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
         num_classes=len(class_names),
         activation=args.activation,
     )
-    optimizer = SGD(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    optimizer = SGD(
+        model.parameters(),
+        lr=args.lr,
+        weight_decay=args.weight_decay,
+        momentum=args.momentum,
+    )
     scheduler = StepLRScheduler(optimizer, step_size=args.step_size, gamma=args.gamma)
 
     history: dict[str, list[float]] = {
@@ -147,6 +156,9 @@ def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
             std=std,
             shuffle=True,
             seed=args.seed + epoch,
+            augment=args.augment,
+            crop_scale_range=(args.min_crop_scale, 1.0),
+            brightness_jitter=args.brightness_jitter,
         ):
             inputs = Tensor(features, requires_grad=False)
             logits = model(inputs)
@@ -193,6 +205,10 @@ def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
                 "hidden_dims": list(args.hidden_dims),
                 "input_dim": input_dim,
                 "image_size": args.image_size,
+                "momentum": args.momentum,
+                "augment": args.augment,
+                "min_crop_scale": args.min_crop_scale,
+                "brightness_jitter": args.brightness_jitter,
                 "train_paths": train_split.paths,
                 "train_labels": train_split.labels.tolist(),
                 "val_paths": val_split.paths,

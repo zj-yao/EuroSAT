@@ -42,10 +42,11 @@ class MLP(Module):
         self.hidden_dims = tuple(int(dim) for dim in hidden_dims)
         self.num_classes = num_classes
         self.activation = activation.lower()
+        hidden_init = "he_uniform" if self.activation == "relu" else "xavier_uniform"
 
-        self.fc1 = Linear(input_dim, self.hidden_dims[0])
-        self.fc2 = Linear(self.hidden_dims[0], self.hidden_dims[1])
-        self.fc3 = Linear(self.hidden_dims[1], num_classes)
+        self.fc1 = Linear(input_dim, self.hidden_dims[0], init=hidden_init)
+        self.fc2 = Linear(self.hidden_dims[0], self.hidden_dims[1], init=hidden_init)
+        self.fc3 = Linear(self.hidden_dims[1], num_classes, init="xavier_uniform")
         self.layers = [self.fc1, self.fc2, self.fc3]
 
     def __call__(self, x: Tensor) -> Tensor:
@@ -83,4 +84,3 @@ class MLP(Module):
                     "bias": state_dict[f"layer{index}.bias"],
                 }
             )
-

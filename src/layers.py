@@ -19,8 +19,18 @@ class Module:
 
 
 class Linear(Module):
-    def __init__(self, in_features: int, out_features: int) -> None:
-        limit = np.sqrt(6.0 / (in_features + out_features))
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        init: str = "xavier_uniform",
+    ) -> None:
+        if init == "xavier_uniform":
+            limit = np.sqrt(6.0 / (in_features + out_features))
+        elif init == "he_uniform":
+            limit = np.sqrt(6.0 / in_features)
+        else:
+            raise ValueError(f"Unsupported initialization: {init}")
         weight = np.random.uniform(-limit, limit, size=(in_features, out_features)).astype(np.float32)
         bias = np.zeros((out_features,), dtype=np.float32)
         self.weight = Tensor(weight, requires_grad=True)
@@ -82,4 +92,3 @@ def iter_parameters(modules: Iterable[Module]) -> list[Tensor]:
     for module in modules:
         params.extend(module.parameters())
     return params
-

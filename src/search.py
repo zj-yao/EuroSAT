@@ -24,6 +24,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--step_size", type=int, default=5)
     parser.add_argument("--gamma", type=float, default=0.5)
+    parser.add_argument("--momentum", type=float, default=0.0)
+    parser.add_argument("--augment", action="store_true")
+    parser.add_argument("--min_crop_scale", type=float, default=0.85)
+    parser.add_argument("--brightness_jitter", type=float, default=0.1)
     parser.add_argument("--train_ratio", type=float, default=0.7)
     parser.add_argument("--val_ratio", type=float, default=0.15)
     parser.add_argument("--max_train_samples", type=int, default=None)
@@ -87,11 +91,15 @@ def main() -> None:
             batch_size=args.batch_size,
             lr=config["lr"],
             weight_decay=config["weight_decay"],
+            momentum=args.momentum,
             step_size=args.step_size,
             gamma=args.gamma,
             hidden_dims=config["hidden_dims"],
             activation=config["activation"],
             image_size=args.image_size,
+            augment=args.augment,
+            min_crop_scale=args.min_crop_scale,
+            brightness_jitter=args.brightness_jitter,
             seed=args.seed,
             train_ratio=args.train_ratio,
             val_ratio=args.val_ratio,
@@ -130,11 +138,15 @@ def main() -> None:
             batch_size=args.batch_size,
             lr=best_result["lr"],
             weight_decay=best_result["weight_decay"],
+            momentum=args.momentum,
             step_size=args.step_size,
             gamma=args.gamma,
             hidden_dims=best_result["hidden_dims"],
             activation=best_result["activation"],
             image_size=args.image_size,
+            augment=args.augment,
+            min_crop_scale=args.min_crop_scale,
+            brightness_jitter=args.brightness_jitter,
             seed=args.seed,
             train_ratio=args.train_ratio,
             val_ratio=args.val_ratio,
@@ -152,4 +164,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

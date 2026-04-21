@@ -101,10 +101,70 @@ def build_splits(
     return splits, class_names
 
 
-def load_image(path: str | Path, image_size: int | None = None) -> np.ndarray:
+def _augment_pil_image(
+    image: Image.Image,
+    rng: np.random.Generator,
+    crop_scale_range: tuple[float, float],
+    brightness_jitter: float,
+) -> Image.Image:
+    if rng.random() < 0.5:
+        image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    if rng.random() < 0.5:
+        image = image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+
+    rotations = int(rng.integers(0, 4))
+    if rotations:
+        transpose_map = {
+            1: Image.Transpose.ROTATE_90,
+            2: Image.Transpose.ROTATE_180,
+            3: Image.Transpose.ROTATE_270,
+        }
+        image = image.transpose(transpose_map[rotations])
+
+    min_scale, max_scale = crop_scale_range
+    if min_scale < 1.0:
+        width, height = image.size
+        crop_size = int(round(min(width, height) * rng.uniform(min_scale, max_scale)))
+        crop_size = max(8, min(crop_size, min(width, height)))
+        if crop_size < min(width, height):
+            max_left = width - crop_size
+            max_top = height - crop_size
+            left = int(rng.integers(0, max_left + 1))
+            top = int(rng.integers(0, max_top + 1))
+            image = image.crop((left, top, left + crop_size, top + crop_size))
+
+    if brightness_jitter > 0.0:
+        array = np.asarray(image, dtype=np.float32)
+        brightness = rng.uniform(1.0 - brightness_jitter, 1.0 + brightness_jitter)
+        contrast = rng.uniform(1.0 - brightness_jitter, 1.0 + brightness_jitter)
+        mean = array.mean(axis=(0, 1), keepdims=True)
+        array = (array - mean) * contrast + mean
+        array = np.clip(array * brightness, 0.0, 255.0)
+        image = Image.fromarray(array.astype(np.uint8), mode="RGB")
+
+    return image
+
+
+def load_image(
+    path: str | Path,
+    image_size: int | None = None,
+    augment: bool = False,
+    rng: np.random.Generator | None = None,
+    crop_scale_range: tuple[float, float] = (1.0, 1.0),
+    brightness_jitter: float = 0.0,
+) -> np.ndarray:
     image_path = Path(path)
     with Image.open(image_path) as image:
         image = image.convert("RGB")
+        if augment:
+            if rng is None:
+                raise ValueError("rng must be provided when augment=True")
+            image = _augment_pil_image(
+                image,
+                rng=rng,
+                crop_scale_range=crop_scale_range,
+                brightness_jitter=brightness_jitter,
+            )
         if image_size is not None:
             image = image.resize((image_size, image_size), Image.Resampling.BILINEAR)
         array = np.asarray(image, dtype=np.float32) / 255.0
@@ -149,16 +209,29 @@ def batch_iterator(
     shuffle: bool = False,
     seed: int = 42,
     return_images: bool = False,
+    augment: bool = False,
+    crop_scale_range: tuple[float, float] = (1.0, 1.0),
+    brightness_jitter: float = 0.0,
 ) -> Iterator[tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]]:
     root = Path(data_dir)
     indices = np.arange(len(split))
+    rng = np.random.default_rng(seed)
     if shuffle:
-        rng = np.random.default_rng(seed)
         rng.shuffle(indices)
 
     for start in range(0, len(indices), batch_size):
         batch_indices = indices[start : start + batch_size]
-        images = [load_image(root / split.paths[index], image_size=image_size) for index in batch_indices]
+        images = [
+            load_image(
+                root / split.paths[index],
+                image_size=image_size,
+                augment=augment,
+                rng=rng if augment else None,
+                crop_scale_range=crop_scale_range,
+                brightness_jitter=brightness_jitter,
+            )
+            for index in batch_indices
+        ]
         image_batch = np.stack(images).astype(np.float32)
         features = preprocess_images(image_batch, mean=mean, std=std)
         label_batch = split.labels[batch_indices]
@@ -166,4 +239,3 @@ def batch_iterator(
             yield features, label_batch, image_batch
         else:
             yield features, label_batch
-

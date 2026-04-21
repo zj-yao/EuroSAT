@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .codex
+/.codex/
 
 EuroSAT_RGB/
 outputs_validation/
@@ -12,14 +13,14 @@ report/*.out
 report/*.synctex.gz
 
 outputs/**
-!outputs/search_32_best/
-outputs/search_32_best/**
-!outputs/search_32_best/plots/
-!outputs/search_32_best/plots/first_layer_weights.png
-!outputs/search_32_best/plots/training_curves.png
-!outputs/final_32_test/
-outputs/final_32_test/**
-!outputs/final_32_test/metrics.json
-!outputs/final_32_test/plots/
-!outputs/final_32_test/plots/confusion_matrix.png
-!outputs/final_32_test/plots/misclassified_examples.png
+!outputs/improved_aug48_momentum_v2_60ep/
+outputs/improved_aug48_momentum_v2_60ep/**
+!outputs/improved_aug48_momentum_v2_60ep/plots/
+!outputs/improved_aug48_momentum_v2_60ep/plots/first_layer_weights.png
+!outputs/improved_aug48_momentum_v2_60ep/plots/training_curves.png
+!outputs/improved_aug48_momentum_v2_60ep_test/
+outputs/improved_aug48_momentum_v2_60ep_test/**
+!outputs/improved_aug48_momentum_v2_60ep_test/metrics.json
+!outputs/improved_aug48_momentum_v2_60ep_test/plots/
+!outputs/improved_aug48_momentum_v2_60ep_test/plots/confusion_matrix.png
+!outputs/improved_aug48_momentum_v2_60ep_test/plots/misclassified_examples.png
