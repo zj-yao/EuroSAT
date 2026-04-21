@@ -115,7 +115,7 @@ python -m src.test \
 ## Submission Links
 
 - Public GitHub Repo: https://github.com/zj-yao/EuroSAT
-- Model weights: https://drive.google.com/file/d/12x7tM2sZAQbbmJRM7hQVw4cYtuewwr1B/view?usp=drive_link
+- Model weights: https://drive.google.com/file/d/1VXfd7M8jE_5B5lWpQK6U-3WAZ5JRSN-s/view?usp=sharing
 
 ## Generated Artifacts
 
